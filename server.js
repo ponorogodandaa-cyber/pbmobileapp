@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const startTelegramBot = require('./telegram');
 
 const ROOT = __dirname;
 const PUBLIC_DIR = path.join(ROOT, 'public');
@@ -225,13 +226,12 @@ app.get('/api/products', (_req, res) => {
   res.json(db.products.filter(product => product.active));
 });
 
-app.post('/api/orders', (req, res) => {
-  const { productId, days, buyer, contact } = req.body || {};
+const createOrder = ({ productId, days, buyer, contact, telegramChat } = {}) => {
   const product = db.products.find(item => item.id === productId && item.active);
-  if (!product) return res.status(404).json({ error: 'Produk tidak ditemukan' });
-  if (![7, 30, 90].includes(Number(days))) return res.status(400).json({ error: 'Durasi tidak valid' });
+  if (!product) throw Object.assign(new Error('Produk tidak ditemukan'), { status: 404 });
+  if (![7, 30, 90].includes(Number(days))) throw Object.assign(new Error('Durasi tidak valid'), { status: 400 });
   if (!String(buyer || '').trim() || !String(contact || '').trim()) {
-    return res.status(400).json({ error: 'Nama dan kontak wajib' });
+    throw Object.assign(new Error('Nama dan kontak wajib'), { status: 400 });
   }
 
   let invoice;
@@ -252,18 +252,27 @@ app.post('/api/orders', (req, res) => {
     status: 'pending',
     createdAt: nowIso(),
     paidAt: null,
-    source: 'web'
+    source: telegramChat ? 'telegram' : 'web',
+    telegramChat: telegramChat ? String(telegramChat).slice(0, 40) : ''
   };
   db.orders.unshift(order);
   saveDb();
+  return order;
+};
 
-  res.status(201).json({
-    invoice: order.invoice,
-    price: order.price,
-    status: order.status,
-    qris: db.settings.qris || '',
-    support: db.settings.supportUrl || ''
-  });
+app.post('/api/orders', (req, res) => {
+  try {
+    const order = createOrder(req.body || {});
+    res.status(201).json({
+      invoice: order.invoice,
+      price: order.price,
+      status: order.status,
+      qris: db.settings.qris || '',
+      support: db.settings.supportUrl || ''
+    });
+  } catch (error) {
+    res.status(error.status || 500).json({ error: error.message });
+  }
 });
 
 app.get('/api/orders/:invoice', (req, res) => {
@@ -279,7 +288,8 @@ app.get('/api/orders/:invoice', (req, res) => {
     productName: order.productName,
     days: order.days,
     licenseKey: license ? license.key : null,
-    expiresAt: license ? license.expiresAt : null
+    expiresAt: license ? license.expiresAt : null,
+    telegramChat: order.telegramChat || ''
   });
 });
 
@@ -551,7 +561,53 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ error: 'Server error' });
 });
 
+const bot = startTelegramBot({
+  token: String(process.env.TELEGRAM_BOT_TOKEN || db.settings.telegramBotToken || ''),
+  ownerId: String(process.env.TELEGRAM_OWNER_ID || db.settings.telegramOwnerId || ''),
+  log: message => console.log('[telegram] ' + message),
+  getProducts: () => db.products.filter(product => product.active),
+  getSettings: () => ({
+    storeName: db.settings.storeName,
+    supportUrl: db.settings.supportUrl,
+    qris: db.settings.qris || '',
+    publicUrl: publicBase()
+  }),
+  createOrder: payload => createOrder(payload),
+  getLicense: key => {
+    const license = db.licenses.find(item => item.key === String(key).trim().toUpperCase());
+    return license ? licenseView(license) : null;
+  },
+  getOrder: invoice => {
+    const order = db.orders.find(item => item.invoice === invoice);
+    if (!order) return null;
+    const license = db.licenses.find(item => item.orderId === order.id);
+    return {
+      invoice: order.invoice,
+      status: order.status,
+      paid: order.paid,
+      buyer: order.buyer,
+      contact: order.contact,
+      productName: order.productName,
+      days: order.days,
+      price: order.price,
+      telegramChat: order.telegramChat || '',
+      licenseKey: license ? license.key : null,
+      expiresAt: license ? license.expiresAt : null
+    };
+  },
+  markPaid: invoice => {
+    const order = db.orders.find(item => item.invoice === invoice);
+    if (!order) return null;
+    const license = activateOrder(order);
+    saveDb();
+    return license;
+  },
+  makeDownload: key => '/api/download/' + makeDownloadToken(key),
+  publicUrl: () => publicBase()
+});
+
 app.listen(PORT, () => {
   console.log(`BLAZE PEDIA jalan di http://localhost:${PORT}`);
   console.log('PIN owner default: blaze123 — ganti di tab Setelan');
+  console.log(bot ? 'Telegram bot aktif' : 'Telegram bot mati — TELEGRAM_BOT_TOKEN belum diisi');
 });
