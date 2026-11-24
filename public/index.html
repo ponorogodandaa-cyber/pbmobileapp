@@ -1,1 +1,881 @@
+<!-- blaze-pedia/public/index.html -->
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08090d">
+  <title>BLAZE PEDIA</title>
+  <style>
+    :root {
+      --bg: #08090d;
+      --panel: #11141c;
+      --panel2: #171b26;
+      --line: #262c3a;
+      --text: #e9edf5;
+      --muted: #8b94a8;
+      --gold: #ffc857;
+      --red: #ff4d5e;
+      --green: #62e08a;
+      --blue: #6ea8ff;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, -apple-system, Segoe UI, sans-serif; }
+    body { padding-bottom: 96px; }
+    a { color: var(--gold); }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .top {
+      position: sticky; top: 0; z-index: 50;
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      background: rgba(8,9,13,.94); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .06em; }
+    .brand-mark {
+      width: 30px; height: 30px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--gold), var(--red));
+      display: grid; place-items: center; color: #08090d; font-weight: 900;
+    }
+    .brand small { color: var(--muted); font-weight: 600; letter-spacing: 0; }
+    .spacer { flex: 1; }
+    .btn {
+      border: 1px solid var(--line); background: var(--panel2); color: var(--text);
+      padding: 9px 13px; border-radius: 10px; font-weight: 700;
+    }
+    .btn:hover { border-color: var(--gold); }
+    .btn.primary { background: var(--gold); color: #0a0b0f; border-color: var(--gold); }
+    .btn.danger { background: #2a1218; color: #ff9aa6; border-color: #5a2430; }
+    .btn.ok { background: #10291b; color: var(--green); border-color: #245a38; }
+    .btn.sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+    main { max-width: 1100px; margin: 0 auto; padding: 18px 16px 40px; }
+    .hidden { display: none !important; }
+    .tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 14px; scrollbar-width: none; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex: 0 0 auto; border: 1px solid var(--line); background: var(--panel);
+      color: var(--muted); padding: 8px 14px; border-radius: 999px; font-weight: 700;
+    }
+    .tab.active { background: var(--gold); color: #0a0b0f; border-color: var(--gold); }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .hero {
+      position: relative; overflow: hidden;
+      border: 1px solid var(--line); border-radius: 20px;
+      background:
+        radial-gradient(900px 240px at 10% -20%, rgba(255,200,87,.20), transparent 60%),
+        radial-gradient(700px 200px at 90% 0%, rgba(255,77,94,.16), transparent 60%),
+        var(--panel);
+      padding: 30px 24px;
+    }
+    .hero h1 { font-size: clamp(28px, 7vw, 52px); line-height: 1.02; margin: 0 0 10px; letter-spacing: -.04em; }
+    .hero h1 span { color: var(--gold); }
+    .hero p { color: var(--muted); max-width: 640px; margin: 0 0 18px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .chip { border: 1px solid var(--line); background: rgba(255,255,255,.03); padding: 6px 10px; border-radius: 999px; color: var(--muted); font-size: 12px; }
+    .grid { display: grid; gap: 14px; }
+    .grid.cards { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+    .grid.two { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .card { border: 1px solid var(--line); background: var(--panel); border-radius: var(--radius); padding: 16px; }
+    .card h3 { margin: 0 0 6px; }
+    .card p { color: var(--muted); margin: 0 0 12px; }
+    .price { font-size: 26px; font-weight: 900; color: var(--gold); }
+    .price small { color: var(--muted); font-size: 12px; font-weight: 600; }
+    .label { display: block; color: var(--muted); font-size: 12px; margin: 0 0 5px; font-weight: 700; }
+    .field {
+      width: 100%; border: 1px solid var(--line); background: #0c0f16; color: var(--text);
+      border-radius: 10px; padding: 10px 11px; outline: none;
+    }
+    .field:focus { border-color: var(--gold); }
+    textarea.field { min-height: 110px; resize: vertical; }
+    .row { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .stack { display: grid; gap: 10px; }
+    .note { color: var(--muted); font-size: 12px; }
+    .ok { color: var(--green); }
+    .bad { color: #ff9aa6; }
+    .gold { color: var(--gold); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; word-break: break-all; }
+    .box { border: 1px dashed var(--line); background: #0c0f16; border-radius: 12px; padding: 12px; }
+    .qr { width: min(220px, 100%); border-radius: 10px; background: #fff; padding: 8px; display: block; margin: 10px auto; }
+    .stat { border: 1px solid var(--line); background: var(--panel2); border-radius: 12px; padding: 12px; }
+    .stat b { display: block; font-size: 24px; color: var(--gold); }
+    .stat span { color: var(--muted); font-size: 12px; }
+    .list { display: grid; gap: 8px; }
+    .item { border: 1px solid var(--line); background: var(--panel2); border-radius: 12px; padding: 11px 12px; }
+    .item .top-line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .pill { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+    .pill.paid { color: var(--green); border-color: #245a38; }
+    .pill.pending { color: var(--gold); border-color: #5a4924; }
+    .pill.revoked { color: #ff9aa6; border-color: #5a2430; }
+    .actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .bottom-nav {
+      position: fixed; z-index: 60; left: 0; right: 0; bottom: 0;
+      display: none; gap: 2px; padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+      background: rgba(8,9,13,.97); border-top: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+    .bottom-nav button {
+      flex: 1; border: 0; background: transparent; color: var(--muted);
+      display: grid; gap: 2px; place-items: center; font-size: 10px; font-weight: 800; padding: 4px 0;
+    }
+    .bottom-nav button.active { color: var(--gold); }
+    .bottom-nav .ic { font-size: 18px; line-height: 1; }
+    .modal {
+      position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,.72);
+      display: none; place-items: center; padding: 18px;
+    }
+    .modal.show { display: grid; }
+    .modal .card { width: min(420px, 100%); }
+    #toast {
+      position: fixed; z-index: 90; left: 50%; bottom: 110px; transform: translateX(-50%) translateY(20px);
+      background: #171b26; border: 1px solid var(--line); color: var(--text);
+      padding: 10px 14px; border-radius: 10px; opacity: 0; pointer-events: none; transition: .2s;
+      max-width: calc(100vw - 32px); text-align: center;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 760px) {
+      body { padding-bottom: 90px; }
+      .top { padding: 10px 12px; }
+      .brand small { display: none; }
+      main { padding: 14px 12px 30px; }
+      .hero { padding: 24px 18px; border-radius: 16px; }
+      .bottom-nav { display: none; }
+      .bottom-nav.show { display: flex; }
+      #public.view-off { display: none; }
+      #owner.view-on { display: block; }
+      .owner-dt-tabs { display: none; }
+    }
+    @media (min-width: 761px) {
+      .bottom-nav { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark">B</div>
+      <div>BLAZE PEDIA <small>// licensed delivery</small></div>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn sm" id="btnStore">Toko</button>
+    <button class="btn sm primary" id="btnOwner">Owner</button>
+  </header>
 
+  <main>
+    <section id="public">
+      <div class="tabs" id="publicTabs">
+        <button class="tab active" data-tab="home">Beranda</button>
+        <button class="tab" data-tab="paket">Paket</button>
+        <button class="tab" data-tab="pasang">Cara Pasang</button>
+        <button class="tab" data-tab="cek">Cek Lisensi</button>
+        <button class="tab" data-tab="update">Update</button>
+      </div>
+
+      <div class="panel active" data-panel="home">
+        <div class="hero">
+          <h1>ESP + AUTO AIM<br><span>BLAZE PB KIT</span></h1>
+          <p>Userscript ringan untuk PB Mobile browser. Pasang lewat Tampermonkey. Lisensi aktif terikat device, update lewat panel owner.</p>
+          <div class="chips">
+            <span class="chip">Chrome PC</span>
+            <span class="chip">Tampermonkey</span>
+            <span class="chip">F2 bidik</span>
+            <span class="chip">F3 ESP</span>
+            <span class="chip">F4 kepala/tubuh</span>
+            <span class="chip">QRIS</span>
+          </div>
+          <div style="margin-top:20px">
+            <button class="btn primary" data-go="paket">Lihat Paket</button>
+          </div>
+        </div>
+        <div class="grid cards" style="margin-top:16px">
+          <div class="card"><h3>Kotak merah</h3><p>Nama, HP, jarak, dan penanda kepala/tubuh langsung di layar.</p></div>
+          <div class="card"><h3>Bidik halus</h3><p>Menarik ke target yang kelihatan. Bisa dimatikan lewat F2.</p></div>
+          <div class="card"><h3>Lisensi nyata</h3><p>Key unik, expiry, binding device, revoke, dan canary per pembeli.</p></div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="paket">
+        <div class="grid two">
+          <div class="stack">
+            <div class="card">
+              <h3>Pesan akses</h3>
+              <p>Isi data, bayar QRIS, lalu kirim nomor invoice ke owner untuk dikonfirmasi.</p>
+              <div class="stack">
+                <div><label class="label">Produk</label><select class="field" id="orderProduct"></select></div>
+                <div><label class="label">Durasi</label><select class="field" id="orderDays"><option value="7">7 hari</option><option value="30" selected>30 hari</option><option value="90">90 hari</option></select></div>
+                <div><label class="label">Nama</label><input class="field" id="orderBuyer" placeholder="nama kamu"></div>
+                <div><label class="label">Kontak</label><input class="field" id="orderContact" placeholder="Telegram / WhatsApp / email"></div>
+                <button class="btn primary" id="btnOrder">Buat Invoice</button>
+              </div>
+            </div>
+            <div class="card hidden" id="orderResult">
+              <h3>Invoice dibuat</h3>
+              <div class="box">
+                <div class="mono gold" id="resInvoice"></div>
+                <div class="note" id="resPrice"></div>
+              </div>
+              <img class="qr" id="qrisImg" alt="QRIS">
+              <div class="note">Bayar QRIS, lalu kirim invoice ke owner. Setelah dikonfirmasi, key muncul di pengecekan status.</div>
+              <div class="actions">
+                <button class="btn sm" id="btnRefreshOrder">Cek Status Invoice</button>
+              </div>
+              <div id="orderStatus" class="note" style="margin-top:10px"></div>
+            </div>
+          </div>
+          <div class="stack">
+            <div id="productCards" class="grid"></div>
+            <div class="card">
+              <h3>Cek invoice</h3>
+              <div class="stack">
+                <input class="field" id="checkInvoice" placeholder="BP-YYYYMMDD-XXXX">
+                <button class="btn" id="btnCheckInvoice">Cek Status</button>
+              </div>
+              <div id="invoiceResult" class="note" style="margin-top:10px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="pasang">
+        <div class="card stack">
+          <h3>Pasang userscript</h3>
+          <div class="grid two">
+            <div class="stack">
+              <div class="box"><b>1.</b> Pasang ekstensi Tampermonkey di Chrome PC.</div>
+              <div class="box"><b>2.</b> Dashboard → Utilities → Add a new script.</div>
+              <div class="box"><b>3.</b> Hapus kode bawaan, paste file `.user.js` hasil download.</div>
+            </div>
+            <div class="stack">
+              <div class="box"><b>4.</b> Simpan dengan Ctrl+S.</div>
+              <div class="box"><b>5.</b> Buka match `https://pbmobile.ch/jogo?...`.</div>
+              <div class="box"><b>6.</b> Klik sekali di game. F2 bidik, F3 ESP, F4 kepala/tubuh.</div>
+            </div>
+          </div>
+          <div class="note">Kalau muncul tulisan `BLAZE LICENSE: AKTIF`, berarti lisensi tersambung. Key hanya bisa dipakai di 1 device pertama yang aktif.</div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="cek">
+        <div class="grid two">
+          <div class="card stack">
+            <h3>Cek lisensi</h3>
+            <label class="label">License key</label>
+            <input class="field mono" id="licenseKey" placeholder="BLAZE-XXXX-XXXX-XXXX-XXXX">
+            <button class="btn primary" id="btnCheckLicense">Cek &amp; Download</button>
+            <div id="licenseResult" class="note"></div>
+          </div>
+          <div class="card stack">
+            <h3>Format key</h3>
+            <div class="box mono">BLAZE-7A3F-92BC-4D10-E8F1</div>
+            <p>Key muncul otomatis setelah invoice dibayar dan dikonfirmasi owner. Simpan key baik-baik.</p>
+            <p class="note">Device pertama yang menjalankan file akan terikat. Ganti device lewat owner.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="update">
+        <div class="card">
+          <h3>Changelog</h3>
+          <div class="list" id="updateList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="owner" class="hidden">
+      <div class="tabs owner-dt-tabs" id="ownerTabs">
+        <button class="tab active" data-otab="ringkas">Ringkas</button>
+        <button class="tab" data-otab="pesanan">Pesanan</button>
+        <button class="tab" data-otab="lisensi">Lisensi</button>
+        <button class="tab" data-otab="katalog">Katalog</button>
+        <button class="tab" data-otab="update">Update</button>
+        <button class="tab" data-otab="setelan">Setelan</button>
+      </div>
+
+      <div class="opanel active" data-opanel="ringkas">
+        <div class="grid cards" id="statGrid"></div>
+        <div class="grid two" style="margin-top:14px">
+          <div class="card"><h3>Pesanan terbaru</h3><div class="list" id="dashOrders"></div></div>
+          <div class="card"><h3>Lisensi terbaru</h3><div class="list" id="dashLicenses"></div></div>
+        </div>
+      </div>
+
+      <div class="opanel" data-opanel="pesanan">
+        <div class="card"><h3>Semua pesanan</h3><div class="list" id="ownerOrders"></div></div>
+      </div>
+
+      <div class="opanel" data-opanel="lisensi">
+        <div class="grid two">
+          <div class="card stack">
+            <h3>Buat lisensi manual</h3>
+            <div><label class="label">Produk</label><select class="field" id="manualProduct"></select></div>
+            <div class="row">
+              <div><label class="label">Durasi</label><select class="field" id="manualDays"><option value="7">7 hari</option><option value="30" selected>30 hari</option><option value="90">90 hari</option></select></div>
+              <div><label class="label">Nama</label><input class="field" id="manualBuyer" placeholder="nama"></div>
+            </div>
+            <div><label class="label">Kontak</label><input class="field" id="manualContact" placeholder="Telegram / WhatsApp"></div>
+            <button class="btn primary" id="btnMakeLicense">Buat Key</button>
+            <div id="manualResult" class="note mono"></div>
+          </div>
+          <div class="card"><h3>Daftar lisensi</h3><div class="list" id="ownerLicenses"></div></div>
+        </div>
+      </div>
+
+      <div class="opanel" data-opanel="katalog">
+        <div class="grid two">
+          <div class="card stack">
+            <h3>Tambah produk</h3>
+            <div><label class="label">ID</label><input class="field" id="prodId" placeholder="pb-simple"></div>
+            <div><label class="label">Nama</label><input class="field" id="prodName" placeholder="BLAZE PB Kit"></div>
+            <div><label class="label">Deskripsi</label><textarea class="field" id="prodDesc"></textarea></div>
+            <div class="row">
+              <div><label class="label">Harga 7 hari</label><input class="field" id="price7" type="number" value="35000"></div>
+              <div><label class="label">Harga 30 hari</label><input class="field" id="price30" type="number" value="99000"></div>
+              <div><label class="label">Harga 90 hari</label><input class="field" id="price90" type="number" value="249000"></div>
+            </div>
+            <button class="btn primary" id="btnAddProduct">Simpan Produk</button>
+          </div>
+          <div class="card"><h3>Produk aktif</h3><div class="list" id="ownerProducts"></div></div>
+        </div>
+        <div class="card stack" style="margin-top:14px">
+          <h3>Template userscript</h3>
+          <p class="note">Template di-server akan diisi key, API URL, dan canary unik tiap pembeli saat download.</p>
+          <textarea class="field mono" id="sourceBox" style="min-height:260px"></textarea>
+          <div><button class="btn primary" id="btnSaveSource">Simpan Template</button></div>
+        </div>
+      </div>
+
+      <div class="opanel" data-opanel="update">
+        <div class="grid two">
+          <div class="card stack">
+            <h3>Tambah update</h3>
+            <div><label class="label">Versi</label><input class="field" id="upVersion" placeholder="1.1.1"></div>
+            <div><label class="label">Catatan</label><textarea class="field" id="upBody" placeholder="perubahan apa"></textarea></div>
+            <button class="btn primary" id="btnAddUpdate">Simpan Update</button>
+          </div>
+          <div class="card"><h3>Riwayat</h3><div class="list" id="ownerUpdates"></div></div>
+        </div>
+      </div>
+
+      <div class="opanel" data-opanel="setelan">
+        <div class="card stack">
+          <h3>Pengaturan toko</h3>
+          <div class="row">
+            <div><label class="label">Nama toko</label><input class="field" id="setStore"></div>
+            <div><label class="label">Kontak support</label><input class="field" id="setSupport"></div>
+          </div>
+          <div><label class="label">Public URL</label><input class="field" id="setPublic" placeholder="https://blazepedia.com"></div>
+          <div class="note">Public URL dipakai userscript untuk mengecek lisensi. Harus HTTPS dan bisa diakses dari browser pembeli.</div>
+          <div><label class="label">QRIS image URL / data URL</label><input class="field" id="setQris" placeholder="https://... atau data:image/png;base64,..."></div>
+          <div><label class="label">Payment secret webhook</label><input class="field" id="setSecret" type="password" placeholder="rahasia webhook"></div>
+          <button class="btn primary" id="btnSaveSettings">Simpan Setelan</button>
+          <div class="box stack">
+            <b>Ganti PIN owner</b>
+            <div class="row">
+              <div><input class="field" id="pinNew" type="password" placeholder="PIN baru min 6"></div>
+              <div><button class="btn" id="btnChangePin">Ganti PIN</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="active" data-otab="ringkas"><span class="ic">◈</span>Ringkas</button>
+    <button data-otab="pesanan"><span class="ic">▤</span>Order</button>
+    <button data-otab="lisensi"><span class="ic">⚿</span>Key</button>
+    <button data-otab="katalog"><span class="ic">▦</span>Katalog</button>
+    <button data-otab="update"><span class="ic">↻</span>Update</button>
+    <button data-otab="setelan"><span class="ic">⚙</span>Setelan</button>
+  </nav>
+
+  <div class="modal" id="loginModal">
+    <div class="card stack">
+      <h3>Login owner</h3>
+      <label class="label">PIN owner</label>
+      <input class="field" id="ownerPin" type="password" placeholder="default: blaze123">
+      <div class="actions">
+        <button class="btn primary" id="btnLogin">Masuk</button>
+        <button class="btn" id="btnCancelLogin">Batal</button>
+      </div>
+      <div id="loginError" class="bad"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const TOKEN_KEY = 'blaze_admin_token';
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => Array.from(document.querySelectorAll(selector));
+    const escapeHtml = value => String(value == null ? '' : value)
+      .replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
+    const rupiah = value => 'Rp' + Number(value || 0).toLocaleString('id-ID');
+    const shortDate = value => {
+      if (!value) return '-';
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+    };
+    const token = () => localStorage.getItem(TOKEN_KEY) || '';
+
+    const toast = message => {
+      const el = $('#toast');
+      el.textContent = message;
+      el.classList.add('show');
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => el.classList.remove('show'), 2600);
+    };
+
+    const api = async (url, options = {}) => {
+      const headers = Object.assign({}, options.headers || {});
+      if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+      if (token()) headers.Authorization = 'Bearer ' + token();
+      const response = await fetch(url, Object.assign({}, options, { headers }));
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || ('HTTP ' + response.status));
+      return data;
+    };
+
+    const qrFallback = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">' +
+      '<rect width="256" height="256" fill="#fff"/>' +
+      '<rect x="18" y="18" width="220" height="220" fill="none" stroke="#111" stroke-width="8"/>' +
+      '<rect x="38" y="38" width="52" height="52" fill="#111"/>' +
+      '<rect x="166" y="38" width="52" height="52" fill="#111"/>' +
+      '<rect x="38" y="166" width="52" height="52" fill="#111"/>' +
+      '<rect x="112" y="38" width="12" height="12" fill="#111"/>' +
+      '<rect x="140" y="66" width="12" height="12" fill="#111"/>' +
+      '<rect x="112" y="112" width="32" height="32" fill="#111"/>' +
+      '<rect x="166" y="112" width="12" height="12" fill="#111"/>' +
+      '<rect x="202" y="140" width="16" height="16" fill="#111"/>' +
+      '<rect x="112" y="202" width="106" height="12" fill="#111"/>' +
+      '<text x="128" y="142" font-size="15" font-family="Arial" font-weight="bold" text-anchor="middle" fill="#111">QRIS BLAZE</text>' +
+      '<text x="128" y="158" font-size="9" font-family="Arial" text-anchor="middle" fill="#555">FILL DI SETELAN OWNER</text>' +
+      '</svg>'
+    );
+
+    let products = [];
+
+    const switchPublicTab = name => {
+      $$('#publicTabs .tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === name));
+      $$('#public .panel').forEach(panel => panel.classList.toggle('active', panel.dataset.panel === name));
+    };
+
+    const switchOwnerTab = name => {
+      $$('[data-otab]').forEach(tab => tab.classList.toggle('active', tab.dataset.otab === name));
+      $$('.opanel').forEach(panel => panel.classList.toggle('active', panel.dataset.opanel === name));
+    };
+
+    const showStore = () => {
+      $('#owner').classList.add('hidden');
+      $('#public').classList.remove('hidden', 'view-off');
+      $('#bottomNav').classList.remove('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const showOwner = () => {
+      if (!token()) return $('#loginModal').classList.add('show');
+      $('#public').classList.add('hidden', 'view-off');
+      $('#owner').classList.remove('hidden', 'view-on');
+      $('#bottomNav').classList.add('show');
+      switchOwnerTab('ringkas');
+      loadOwnerAll();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const renderProducts = list => {
+      products = list;
+      $('#productCards').innerHTML = list.map(product => `
+        <div class="card">
+          <h3>${escapeHtml(product.name)}</h3>
+          <p>${escapeHtml(product.desc)}</p>
+          ${[7, 30, 90].map(days => `<div class="price">${rupiah(product.prices[days])} <small>/ ${days} hari</small></div>`).join('')}
+        </div>
+      `).join('') || '<div class="card">Belum ada produk aktif.</div>';
+
+      const options = list.map(product => `<option value="${escapeHtml(product.id)}">${escapeHtml(product.name)}</option>`).join('');
+      $('#orderProduct').innerHTML = options;
+      $('#manualProduct').innerHTML = options;
+    };
+
+    const loadPublic = async () => {
+      try {
+        renderProducts(await api('/api/products'));
+        const updates = await api('/api/updates');
+        $('#updateList').innerHTML = updates.map(item => `
+          <div class="item">
+            <div class="top-line"><b>${escapeHtml(item.version)}</b><span class="pill">${shortDate(item.createdAt)}</span></div>
+            <div class="note" style="margin-top:6px">${escapeHtml(item.body)}</div>
+          </div>
+        `).join('') || '<div class="card">Belum ada update.</div>';
+      } catch (error) {
+        toast(error.message);
+      }
+    };
+
+    const loadSettings = async () => {
+      try {
+        const settings = await api('/api/settings');
+        $('#qrisImg').src = settings.qris || qrFallback;
+      } catch (_) {
+        $('#qrisImg').src = qrFallback;
+      }
+    };
+
+    $('#publicTabs').addEventListener('click', event => {
+      const tab = event.target.closest('.tab');
+      if (tab) switchPublicTab(tab.dataset.tab);
+    });
+
+    $$('[data-go]').forEach(button => button.addEventListener('click', () => switchPublicTab(button.dataset.go)));
+
+    $('#btnOwner').addEventListener('click', showOwner);
+    $('#btnStore').addEventListener('click', showStore);
+    $('#btnCancelLogin').addEventListener('click', () => $('#loginModal').classList.remove('show'));
+
+    $('#btnLogin').addEventListener('click', async () => {
+      try {
+        const data = await api('/api/admin/login', {
+          method: 'POST',
+          body: JSON.stringify({ pin: $('#ownerPin').value })
+        });
+        localStorage.setItem(TOKEN_KEY, data.token);
+        $('#ownerPin').value = '';
+        $('#loginError').textContent = '';
+        $('#loginModal').classList.remove('show');
+        showOwner();
+      } catch (error) {
+        $('#loginError').textContent = error.message;
+      }
+    });
+
+    document.addEventListener('click', event => {
+      const tab = event.target.closest('[data-otab]');
+      if (tab) switchOwnerTab(tab.dataset.otab);
+    });
+
+    $('#btnOrder').addEventListener('click', async () => {
+      try {
+        const data = await api('/api/orders', {
+          method: 'POST',
+          body: JSON.stringify({
+            productId: $('#orderProduct').value,
+            days: Number($('#orderDays').value),
+            buyer: $('#orderBuyer').value,
+            contact: $('#orderContact').value
+          })
+        });
+        $('#orderResult').classList.remove('hidden');
+        $('#resInvoice').textContent = data.invoice;
+        $('#resPrice').textContent = rupiah(data.price) + ' — menunggu pembayaran';
+        $('#qrisImg').src = data.qris || qrFallback;
+        $('#checkInvoice').value = data.invoice;
+        $('#orderStatus').textContent = 'Invoice aktif. Bayar QRIS lalu kirim ke owner.';
+        toast('Invoice dibuat');
+      } catch (error) {
+        toast(error.message);
+      }
+    });
+
+    const checkInvoice = async () => {
+      try {
+        const invoice = $('#checkInvoice').value.trim();
+        if (!invoice) return toast('Masukkan invoice');
+        const data = await api('/api/orders/' + encodeURIComponent(invoice));
+        const html = `
+          <div>Status: <b class="${data.paid ? 'ok' : 'gold'}">${escapeHtml(data.status.toUpperCase())}</b></div>
+          <div>Invoice: <span class="mono">${escapeHtml(data.invoice)}</span></div>
+          ${data.licenseKey ? `<div>Key: <span class="mono gold">${escapeHtml(data.licenseKey)}</span></div>
+          <div>Expiry: ${escapeHtml(shortDate(data.expiresAt))}</div>` : '<div class="note">Key muncul setelah pembayaran dikonfirmasi.</div>'}
+        `;
+        $('#invoiceResult').innerHTML = html;
+        $('#orderStatus').innerHTML = html;
+      } catch (error) {
+        toast(error.message);
+      }
+    };
+
+    $('#btnCheckInvoice').addEventListener('click', checkInvoice);
+    $('#btnRefreshOrder').addEventListener('click', checkInvoice);
+
+    $('#btnCheckLicense').addEventListener('click', async () => {
+      try {
+        const key = $('#licenseKey').value.trim();
+        if (!key) return toast('Masukkan key');
+        const data = await api('/api/license/status?key=' + encodeURIComponent(key));
+        if (!data.active) {
+          $('#licenseResult').innerHTML = `<span class="bad">TIDAK AKTIF: ${escapeHtml(data.reason)}</span>`;
+          return;
+        }
+        $('#licenseResult').innerHTML = `
+          <div class="ok">AKTIF — ${escapeHtml(data.productName)}</div>
+          <div>Expiry: ${escapeHtml(shortDate(data.expiresAt))}</div>
+          <div style="margin-top:8px"><a class="btn primary" href="${escapeHtml(data.downloadUrl)}">Download .user.js</a></div>
+        `;
+      } catch (error) {
+        $('#licenseResult').innerHTML = `<span class="bad">${escapeHtml(error.message)}</span>`;
+      }
+    });
+
+    const loadOwnerAll = () => {
+      loadOverview();
+      loadOwnerOrders();
+      loadOwnerLicenses();
+      loadOwnerProducts();
+      loadOwnerUpdates();
+      loadOwnerSettings();
+      loadTemplate();
+    };
+
+    const loadOverview = async () => {
+      try {
+        const data = await api('/api/admin/overview');
+        const stats = [
+          ['Pesanan', data.orders], ['Lunas', data.paidOrders], ['Pending', data.pendingOrders],
+          ['Lisensi', data.licenses], ['Aktif', data.activeLicenses], ['Omzet', rupiah(data.revenue)]
+        ];
+        $('#statGrid').innerHTML = stats.map(([label, value]) => `<div class="stat"><b>${escapeHtml(value)}</b><span>${label}</span></div>`).join('');
+        $('#dashOrders').innerHTML = data.recentOrders.map(order => `
+          <div class="item"><div class="top-line"><b class="mono">${escapeHtml(order.invoice)}</b><span class="pill ${order.paid ? 'paid' : 'pending'}">${escapeHtml(order.status.toUpperCase())}</span></div>
+          <div class="note">${escapeHtml(order.buyer)} · ${rupiah(order.price)} · ${shortDate(order.createdAt)}</div></div>
+        `).join('') || '<div class="note">Belum ada pesanan.</div>';
+        $('#dashLicenses').innerHTML = data.recentLicenses.map(license => `
+          <div class="item"><div class="mono gold">${escapeHtml(license.key)}</div><div class="note">${escapeHtml(license.productName)} · ${escapeHtml(license.status)} · ${shortDate(license.expiresAt)}</div></div>
+        `).join('') || '<div class="note">Belum ada lisensi.</div>';
+      } catch (error) {
+        if (error.message.toLowerCase().includes('owner')) return forceLogout();
+        toast(error.message);
+      }
+    };
+
+    const loadOwnerOrders = async () => {
+      try {
+        const orders = await api('/api/admin/orders');
+        $('#ownerOrders').innerHTML = orders.map(order => `
+          <div class="item">
+            <div class="top-line"><b class="mono">${escapeHtml(order.invoice)}</b><span class="pill ${order.paid ? 'paid' : 'pending'}">${escapeHtml(order.status.toUpperCase())}</span></div>
+            <div class="note">${escapeHtml(order.buyer)} · ${escapeHtml(order.contact)}</div>
+            <div class="note">${escapeHtml(order.productName)} · ${order.days} hari · ${rupiah(order.price)}</div>
+            <div class="actions">
+              ${order.paid ? '' : `<button class="btn sm ok" data-paid="${escapeHtml(order.invoice)}">Tandai Lunas</button>`}
+              <button class="btn sm" data-copy="${escapeHtml(order.invoice)}">Salin Invoice</button>
+            </div>
+          </div>
+        `).join('') || '<div class="note">Belum ada pesanan.</div>';
+      } catch (error) { toast(error.message); }
+    };
+
+    const loadOwnerLicenses = async () => {
+      try {
+        const licenses = await api('/api/admin/licenses');
+        $('#ownerLicenses').innerHTML = licenses.map(license => `
+          <div class="item">
+            <div class="top-line"><b class="mono gold">${escapeHtml(license.key)}</b><span class="pill ${license.status === 'active' ? 'paid' : 'revoked'}">${escapeHtml(license.status.toUpperCase())}</span></div>
+            <div class="note">${escapeHtml(license.buyer)} · ${escapeHtml(license.productName)} · ${license.days} hari</div>
+            <div class="note">Expiry: ${escapeHtml(shortDate(license.expiresAt))}</div>
+            <div class="note">Device: <span class="mono">${escapeHtml(license.device || '-')}</span> · Canary: ${escapeHtml(license.canary)}</div>
+            <div class="actions">
+              <button class="btn sm" data-copy="${escapeHtml(license.key)}">Salin Key</button>
+              ${license.status === 'active'
+                ? `<button class="btn sm danger" data-revoke="${escapeHtml(license.key)}">Revoke</button>`
+                : `<button class="btn sm ok" data-activate="${escapeHtml(license.key)}">Aktifkan</button>`}
+              <button class="btn sm" data-extend="${escapeHtml(license.key)}" data-days="7">+7h</button>
+              <button class="btn sm" data-extend="${escapeHtml(license.key)}" data-days="30">+30h</button>
+            </div>
+          </div>
+        `).join('') || '<div class="note">Belum ada lisensi.</div>';
+      } catch (error) { toast(error.message); }
+    };
+
+    const loadOwnerProducts = async () => {
+      try {
+        const list = await api('/api/admin/products');
+        $('#ownerProducts').innerHTML = list.map(product => `
+          <div class="item">
+            <div class="top-line"><b>${escapeHtml(product.name)}</b><span class="pill ${product.active ? 'paid' : 'revoked'}">${product.active ? 'ACTIVE' : 'OFF'}</span></div>
+            <div class="note mono">${escapeHtml(product.id)}</div>
+            <div class="note">${rupiah(product.prices[7])} / ${rupiah(product.prices[30])} / ${rupiah(product.prices[90])}</div>
+            <div class="actions"><button class="btn sm" data-toggle-product="${escapeHtml(product.id)}" data-active="${product.active ? '0' : '1'}">${product.active ? 'Matikan' : 'Aktifkan'}</button></div>
+          </div>
+        `).join('') || '<div class="note">Belum ada produk.</div>';
+      } catch (error) { toast(error.message); }
+    };
+
+    const loadOwnerUpdates = async () => {
+      try {
+        const updates = await api('/api/admin/updates');
+        $('#ownerUpdates').innerHTML = updates.map(item => `
+          <div class="item"><div class="top-line"><b>${escapeHtml(item.version)}</b><span class="pill">${shortDate(item.createdAt)}</span></div><div class="note">${escapeHtml(item.body)}</div></div>
+        `).join('') || '<div class="note">Belum ada update.</div>';
+      } catch (error) { toast(error.message); }
+    };
+
+    const loadOwnerSettings = async () => {
+      try {
+        const settings = await api('/api/admin/settings');
+        $('#setStore').value = settings.storeName || '';
+        $('#setSupport').value = settings.supportUrl || '';
+        $('#setPublic').value = settings.publicUrl || '';
+        $('#setQris').value = settings.qris || '';
+      } catch (error) { toast(error.message); }
+    };
+
+    const loadTemplate = async () => {
+      try {
+        const data = await api('/api/admin/source');
+        $('#sourceBox').value = data.source || '';
+      } catch (error) { toast(error.message); }
+    };
+
+    const forceLogout = () => {
+      localStorage.removeItem(TOKEN_KEY);
+      $('#toast').textContent = 'Sesi owner habis. Login lagi.';
+      $('#toast').classList.add('show');
+      $('#loginModal').classList.add('show');
+      showStore();
+    };
+
+    $('#ownerOrders').addEventListener('click', async event => {
+      const paid = event.target.closest('[data-paid]');
+      const copy = event.target.closest('[data-copy]');
+      if (paid) {
+        try {
+          await api('/api/admin/orders/' + encodeURIComponent(paid.dataset.paid) + '/paid', { method: 'POST' });
+          toast('Invoice lunas, key dibuat');
+          loadOverview(); loadOwnerOrders(); loadOwnerLicenses();
+        } catch (error) { toast(error.message); }
+      }
+      if (copy) {
+        navigator.clipboard?.writeText(copy.dataset.copy);
+        toast('Tersalin');
+      }
+    });
+
+    $('#ownerLicenses').addEventListener('click', async event => {
+      const copy = event.target.closest('[data-copy]');
+      const revoke = event.target.closest('[data-revoke]');
+      const activate = event.target.closest('[data-activate]');
+      const extend = event.target.closest('[data-extend]');
+      if (copy) { navigator.clipboard?.writeText(copy.dataset.copy); toast('Tersalin'); }
+      if (revoke && confirm('Revoke lisensi ' + revoke.dataset.revoke + '?')) {
+        await api('/api/admin/licenses/' + encodeURIComponent(revoke.dataset.revoke) + '/revoke', { method: 'POST' });
+        toast('Lisensi direvoke'); loadOverview(); loadOwnerLicenses();
+      }
+      if (activate) {
+        await api('/api/admin/licenses/' + encodeURIComponent(activate.dataset.activate) + '/activate', { method: 'POST' });
+        toast('Lisensi aktif'); loadOverview(); loadOwnerLicenses();
+      }
+      if (extend) {
+        await api('/api/admin/licenses/' + encodeURIComponent(extend.dataset.extend) + '/extend', {
+          method: 'POST', body: JSON.stringify({ days: Number(extend.dataset.days) })
+        });
+        toast('Expiry ditambah'); loadOverview(); loadOwnerLicenses();
+      }
+    });
+
+    $('#ownerProducts').addEventListener('click', async event => {
+      const button = event.target.closest('[data-toggle-product]');
+      if (!button) return;
+      await api('/api/admin/products/' + encodeURIComponent(button.dataset.toggleProduct), {
+        method: 'PATCH', body: JSON.stringify({ active: button.dataset.active === '1' })
+      });
+      toast('Produk diupdate');
+      loadOwnerProducts(); loadPublic();
+    });
+
+    $('#btnMakeLicense').addEventListener('click', async () => {
+      try {
+        const data = await api('/api/admin/licenses', {
+          method: 'POST',
+          body: JSON.stringify({
+            productId: $('#manualProduct').value,
+            days: Number($('#manualDays').value),
+            buyer: $('#manualBuyer').value,
+            contact: $('#manualContact').value
+          })
+        });
+        $('#manualResult').textContent = data.key + ' — ' + shortDate(data.expiresAt);
+        toast('Key dibuat'); loadOverview(); loadOwnerLicenses();
+      } catch (error) { toast(error.message); }
+    });
+
+    $('#btnAddProduct').addEventListener('click', async () => {
+      try {
+        await api('/api/admin/products', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: $('#prodId').value,
+            name: $('#prodName').value,
+            desc: $('#prodDesc').value,
+            prices: {
+              7: Number($('#price7').value),
+              30: Number($('#price30').value),
+              90: Number($('#price90').value)
+            }
+          })
+        });
+        toast('Produk disimpan');
+        $('#prodId').value = ''; $('#prodName').value = ''; $('#prodDesc').value = '';
+        loadOwnerProducts(); loadPublic();
+      } catch (error) { toast(error.message); }
+    });
+
+    $('#btnSaveSource').addEventListener('click', async () => {
+      try {
+        const data = await api('/api/admin/source', {
+          method: 'POST', body: JSON.stringify({ source: $('#sourceBox').value })
+        });
+        toast('Template tersimpan · ' + data.size + ' char');
+      } catch (error) { toast(error.message); }
+    });
+
+    $('#btnAddUpdate').addEventListener('click', async () => {
+      try {
+        await api('/api/admin/updates', {
+          method: 'POST',
+          body: JSON.stringify({ version: $('#upVersion').value, body: $('#upBody').value })
+        });
+        $('#upVersion').value = ''; $('#upBody').value = '';
+        toast('Update disimpan'); loadOwnerUpdates(); loadPublic();
+      } catch (error) { toast(error.message); }
+    });
+
+    $('#btnSaveSettings').addEventListener('click', async () => {
+      try {
+        await api('/api/admin/settings', {
+          method: 'PATCH',
+          body: JSON.stringify({
+            storeName: $('#setStore').value,
+            supportUrl: $('#setSupport').value,
+            publicUrl: $('#setPublic').value,
+            qris: $('#setQris').value,
+            paymentSecret: $('#setSecret').value
+          })
+        });
+        $('#setSecret').value = '';
+        toast('Setelan disimpan'); loadSettings(); loadOverview();
+      } catch (error) { toast(error.message); }
+    });
+
+    $('#btnChangePin').addEventListener('click', async () => {
+      try {
+        const pin = $('#pinNew').value;
+        if (!pin) return toast('PIN kosong');
+        await api('/api/admin/pin', { method: 'POST', body: JSON.stringify({ pin }) });
+        $('#pinNew').value = '';
+        toast('PIN diganti');
+      } catch (error) { toast(error.message); }
+    });
+
+    loadPublic();
+    loadSettings();
+    if (token()) showOwner();
+  })();
+  </script>
+</body>
+</html>
